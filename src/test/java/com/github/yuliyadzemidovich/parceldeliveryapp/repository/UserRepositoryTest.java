@@ -1,5 +1,6 @@
 package com.github.yuliyadzemidovich.parceldeliveryapp.repository;
 
+import com.github.yuliyadzemidovich.parceldeliveryapp.entity.Role;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ class UserRepositoryTest {
         user.setName("John Doe");
         user.setEmail("johndoe@example.com");
         user.setPassword("password");
-        user.setRole("user");
+        user.setRole(Role.ROLE_USER);
         userRepository.save(user);
 
         // Get the newly created user by ID

@@ -29,7 +29,7 @@ public class AppUserDetailsService implements UserDetailsService {
         AppUserDetails userDetails = new AppUserDetails();
         userDetails.setUsername(user.getEmail());
         userDetails.setPassword(user.getPassword());
-        userDetails.setRole(user.getRole());
+        userDetails.setRole(user.getRole().getSecurityValue());
         return userDetails;
     }
 }
