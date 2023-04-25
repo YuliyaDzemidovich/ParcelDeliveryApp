@@ -14,6 +14,18 @@ services:
       - db_data:/var/lib/postgresql/data
     networks:
       - delivery-network
+  web:
+    image: parceldeliveryapp
+    restart: unless-stopped
+    environment:
+      APP_NAME: "parceldeliveryapp"
+      SPRING_PROFILES_ACTIVE: "test"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - delivery-network
 
 volumes:
   db_data:

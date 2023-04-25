@@ -1,0 +1,14 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /parceldeliveryapp
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/deliveryApp
+    username: delivery
+    password: password
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    databasePlatform: org.hibernate.dialect.PostgreSQLDialect
