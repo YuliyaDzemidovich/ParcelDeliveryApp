@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.PropertySource;
 
 /**
  * {@link SpringBootServletInitializer} is an opinionated WebApplicationInitializer to run a SpringApplication
@@ -12,6 +13,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  */
 @SpringBootApplication
 @EntityScan("com.github.yuliyadzemidovich.parceldeliveryapp")
+@PropertySource("classpath:secrets-${spring.profiles.active}.properties")
 public class ParcelDeliveryAppApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
