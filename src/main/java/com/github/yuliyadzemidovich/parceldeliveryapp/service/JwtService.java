@@ -13,4 +13,18 @@ public interface JwtService {
      * @return generated JWT
      */
     String generateToken(String subject);
+
+    /**
+     * Verifies that token is valid
+     * @param jwt JSON Web Token
+     * @return true is token is valid, false otherwise
+     */
+    boolean isValidToken(String jwt);
+
+    /**
+     * Extract user email from JWT claims.
+     * @param jwt JSON Web Token
+     * @return String with user's email
+     */
+    String extractUserEmail(String jwt);
 }
