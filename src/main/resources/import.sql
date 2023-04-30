@@ -1,0 +1,1 @@
+INSERT INTO users (name, email, password, role) VALUES ('super admin', 'sadmin@example.com', '{bcrypt}$2a$10$QLJbKBmqJdXVN.4EJ0XGLukc5calPzAIR4KkbttILE1twXGXZ1dSa', 0);

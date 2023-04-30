@@ -7,13 +7,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class HelloServiceImpl implements HelloService {
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','USER')")
     @Override
     public String greetUser() {
         return "hello authenticated user";
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @Override
     public String greetAdmin() {
         return "hello authenticated admin";
