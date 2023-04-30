@@ -1,5 +1,8 @@
 package com.github.yuliyadzemidovich.parceldeliveryapp.controller;
 
+import com.github.yuliyadzemidovich.parceldeliveryapp.service.HelloService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,14 +14,22 @@ import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSI
  */
 @RestController
 @RequestMapping(API_VERSION + "/hello")
+@RequiredArgsConstructor
 public class HelloController {
+
+    private final HelloService helloService;
 
     /**
      * Example of endpoint that only authenticated user should be allowed to call.
      * Should throw 4xx for unauthenticated user.
      */
     @GetMapping
-    public String hello() {
-        return "hello authenticated user";
+    public String helloUser() {
+        return helloService.greetUser();
+    }
+
+    @GetMapping("/admin")
+    public String helloAdmin(Authentication auth) {
+        return helloService.greetAdmin();
     }
 }

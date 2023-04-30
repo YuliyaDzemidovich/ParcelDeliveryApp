@@ -12,8 +12,8 @@ import org.springframework.context.annotation.PropertySource;
  * from the application context to the server.
  */
 @SpringBootApplication
-@EntityScan("com.github.yuliyadzemidovich.parceldeliveryapp")
-@PropertySource("classpath:secrets-${spring.profiles.active}.properties")
+@EntityScan("com.github.yuliyadzemidovich.parceldeliveryapp") // enable @Entity classes auto scan
+@PropertySource("classpath:secrets-${spring.profiles.active}.properties") // load additional property file with secrets
 public class ParcelDeliveryAppApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
