@@ -27,6 +27,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        userDto.setRole(Role.ROLE_USER.getShortValue());
+        return createAnyUser(userDto);
+    }
+
+    @Override
+    public UserDto createCourier(UserDto userDto) {
+        userDto.setRole(Role.ROLE_COURIER.getShortValue());
+        return createAnyUser(userDto);
+    }
+
+    private UserDto createAnyUser(UserDto userDto) {
         if (userDto.getId() != null) {
             throw new ValidationException("Cannot create user with specific ID - please remove ID from the body", HttpStatus.BAD_REQUEST);
         }

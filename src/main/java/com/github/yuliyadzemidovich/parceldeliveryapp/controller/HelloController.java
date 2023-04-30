@@ -2,7 +2,6 @@ package com.github.yuliyadzemidovich.parceldeliveryapp.controller;
 
 import com.github.yuliyadzemidovich.parceldeliveryapp.service.HelloService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +28,7 @@ public class HelloController {
     }
 
     @GetMapping("/admin")
-    public String helloAdmin(Authentication auth) {
+    public String helloAdmin() {
         return helloService.greetAdmin();
     }
 }
