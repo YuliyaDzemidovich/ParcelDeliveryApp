@@ -5,6 +5,7 @@ import com.github.yuliyadzemidovich.parceldeliveryapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.COURIER;
 public class CourierController {
     private final UserService userService;
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public UserDto register(@RequestBody @Valid UserDto userDto) {
         return userService.createCourier(userDto);

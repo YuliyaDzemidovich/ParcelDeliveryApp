@@ -1,7 +1,6 @@
 package com.github.yuliyadzemidovich.parceldeliveryapp.service;
 
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.UserDto;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,6 +21,5 @@ public interface UserService {
      * @param userDto dto with new user info
      * @return DTO of created user
      */
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     UserDto createCourier(UserDto userDto);
 }

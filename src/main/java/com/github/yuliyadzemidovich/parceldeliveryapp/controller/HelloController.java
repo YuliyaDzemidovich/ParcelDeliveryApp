@@ -2,6 +2,7 @@ package com.github.yuliyadzemidovich.parceldeliveryapp.controller;
 
 import com.github.yuliyadzemidovich.parceldeliveryapp.service.HelloService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,11 +23,13 @@ public class HelloController {
      * Example of endpoint that only authenticated user should be allowed to call.
      * Should throw 4xx for unauthenticated user.
      */
-    @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','USER')")
+    @GetMapping("/user")
     public String helloUser() {
         return helloService.greetUser();
     }
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @GetMapping("/admin")
     public String helloAdmin() {
         return helloService.greetAdmin();
