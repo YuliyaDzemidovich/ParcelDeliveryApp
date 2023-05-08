@@ -8,9 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -23,11 +21,6 @@ public class Delivery {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parcel_id")
-    private Parcel parcel;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "courier_id")
     private CourierInfo courierInfo;
@@ -38,18 +31,12 @@ public class Delivery {
     @NotNull
     private BigDecimal pickupLongitude;
 
-    @NotNull
     private BigDecimal deliveryLatitude;
 
-    @NotNull
     private BigDecimal deliveryLongitude;
 
     @NotNull
     private java.sql.Timestamp pickupTime;
 
     private java.sql.Timestamp deliveryTime;
-
-    @NotBlank
-    @Size(max = 20)
-    private String status;
 }
