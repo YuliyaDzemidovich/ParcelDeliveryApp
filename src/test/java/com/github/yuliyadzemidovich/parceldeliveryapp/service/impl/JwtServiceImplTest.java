@@ -9,6 +9,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.security.SecureRandom;
@@ -20,16 +21,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JwtServiceImplTest {
 
+    private final String TEST_USER_EMAIL = "example@mail.com";
+
     private final JwtServiceImpl jwtService = new JwtServiceImpl();
 
     @Test
     void generateToken() throws JOSEException, ParseException {
-        final String TEST_USER_EMAIL = "example@mail.com";
-
-        // Generate random 512-bit (64-byte) shared secret
-        SecureRandom random = new SecureRandom();
-        byte[] testSharedSecret = new byte[64];
-        random.nextBytes(testSharedSecret);
+        byte[] testSharedSecret = generateSharedSecret();
 
         // mock property injection
         jwtService.sharedSecret = testSharedSecret;
@@ -50,6 +48,26 @@ class JwtServiceImplTest {
     }
 
     @Test
+    void isValidToken() {
+        // mock sharedSecret property injection
+        jwtService.sharedSecret = generateSharedSecret();
+        String jwt = jwtService.generateToken(TEST_USER_EMAIL);
+
+        // method under test
+        boolean isValidToken = jwtService.isValidToken(jwt);
+        assertTrue(isValidToken);
+    }
+
+    private static byte[] generateSharedSecret() {
+        // Generate random 512-bit (64-byte) shared secret
+        SecureRandom random = new SecureRandom();
+        byte[] testSharedSecret = new byte[64];
+        random.nextBytes(testSharedSecret);
+        return testSharedSecret;
+    }
+
+    @Test
+    @Disabled("example of jwt generation")
     void generateTestToken() throws JOSEException, ParseException {
         // Generate random 512-bit (64-byte) shared secret
         SecureRandom random = new SecureRandom();
