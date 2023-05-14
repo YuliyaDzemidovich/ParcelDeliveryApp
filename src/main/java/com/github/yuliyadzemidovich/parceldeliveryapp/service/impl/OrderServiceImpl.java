@@ -2,6 +2,7 @@ package com.github.yuliyadzemidovich.parceldeliveryapp.service.impl;
 
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.DeliveryDto;
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.OrderDto;
+import com.github.yuliyadzemidovich.parceldeliveryapp.dto.ParcelDto;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.Delivery;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.Order;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.OrderStatus;
@@ -20,10 +21,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.entity.Role.ROLE_SUPER_ADMIN;
@@ -53,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
         DeliveryDto deliveryDto = orderDto.getDeliveryDto();
         String pickupTime = deliveryDto.getPickupTime();
         if (StringUtils.isEmpty(pickupTime)) {
-            delivery.setPickupTime(Timestamp.from(Instant.now()));
+            delivery.setPickupTime(Timestamp.from(Instant.now().truncatedTo(ChronoUnit.SECONDS)));
         } else {
             delivery.setPickupTime(Timestamp.valueOf(pickupTime));
         }
@@ -89,6 +94,18 @@ public class OrderServiceImpl implements OrderService {
         return map(savedOrder);
     }
 
+    @Override
+    public List<OrderDto> getUserOrders() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String authedUserEmail = auth.getName();
+        long authedUserId = userRepo.findByEmail(authedUserEmail).getId();
+        List<Order> orders = orderRepo.findAllBySenderId(authedUserId);
+        if (CollectionUtils.isEmpty(orders)) {
+            return new ArrayList<>();
+        }
+        return orders.stream().map(this::map).toList();
+    }
+
     private boolean isUserSuperAdmin(Authentication auth) {
         Optional<? extends GrantedAuthority> superAdminAuthority = auth.getAuthorities().stream()
                 .filter(ga -> ROLE_SUPER_ADMIN.getSecurityValue().equals(ga.getAuthority())).findFirst();
@@ -96,6 +113,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private OrderDto map(Order order) {
+        Parcel parcel = order.getParcel();
+        ParcelDto parcelDto = ParcelDto.builder()
+                .id(parcel.getId())
+                .weight(parcel.getWeight())
+                .build();
+        Delivery delivery = order.getDelivery();
+        DeliveryDto deliveryDto = DeliveryDto.builder()
+                .id(delivery.getId())
+                .pickupTime(delivery.getPickupTime().toString())
+                .pickupLatitude(delivery.getPickupLatitude().toString())
+                .pickupLongitude(delivery.getPickupLongitude().toString())
+                .build();
         return OrderDto.builder()
                 .id(order.getId())
                 .receiverPhone(order.getReceiverPhone())
@@ -103,6 +132,8 @@ public class OrderServiceImpl implements OrderService {
                 .receiverName(order.getReceiverName())
                 .senderId(order.getSender().getId())
                 .status(order.getStatus())
+                .parcelDto(parcelDto)
+                .deliveryDto(deliveryDto)
                 .build();
     }
 }

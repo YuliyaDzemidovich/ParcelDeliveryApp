@@ -3,6 +3,9 @@ package com.github.yuliyadzemidovich.parceldeliveryapp;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.Role;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.User;
 
+import java.math.BigDecimal;
+
+
 public class TestUtil {
 
     public static final String TEST_USER_1_NAME = "Bob";
@@ -40,5 +43,15 @@ public class TestUtil {
         user.setEmail(TEST_SUPER_ADMIN_EMAIL);
         user.setPassword(TEST_SUPER_ADMIN_PWD);
         return user;
+    }
+
+    public static boolean areBigDecimalsEqual(String num1, String num2, double precision) {
+        return areBigDecimalsEqual(new BigDecimal(num1), new BigDecimal(num2), precision);
+    }
+
+    public static boolean areBigDecimalsEqual(BigDecimal num1, BigDecimal num2, double precision) {
+        return Math.abs(num1
+                .subtract(num2)
+                .longValue()) < precision;
     }
 }

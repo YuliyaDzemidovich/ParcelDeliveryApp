@@ -22,6 +22,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.TEST_SUPER_ADMIN_EMAIL;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.TEST_SUPER_ADMIN_PWD;
@@ -108,6 +109,58 @@ class OrderServiceIntegrationTest {
         assertTrue(createdOrder.getId() > 0);
         assertEquals(OrderStatus.NEW, createdOrder.getStatus());
         assertEquals(anotherUserId, createdOrder.getSenderId());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_1_EMAIL, password = TEST_USER_1_PWD, roles = "USER")
+    void getUserOrders() {
+        // pre create order
+        User sender = TestUtil.getUser1();
+        sender = userRepo.findByEmail(sender.getEmail());
+        long senderId = sender.getId();
+        OrderDto orderReq = getOrderReq(senderId);
+        OrderDto createdOrder = orderService.createOrder(orderReq);
+
+        // method under test
+        List<OrderDto> fetchedOrders = orderService.getUserOrders();
+
+        // assertions
+        assertNotNull(fetchedOrders);
+        assertEquals(1, fetchedOrders.size());
+        OrderDto fetchedOrder = fetchedOrders.get(0);
+        assertEquals(createdOrder.getId(), fetchedOrder.getId());
+        assertEquals(createdOrder.getSenderId(), fetchedOrder.getSenderId());
+        assertEquals(createdOrder.getStatus(), fetchedOrder.getStatus());
+        assertEquals(createdOrder.getReceiverName(), fetchedOrder.getReceiverName());
+        assertEquals(createdOrder.getReceiverAddress(), fetchedOrder.getReceiverAddress());
+        assertEquals(createdOrder.getReceiverPhone(), fetchedOrder.getReceiverPhone());
+
+        // ParcelDto assertions
+        assertEquals(createdOrder.getParcelDto().getId(), fetchedOrder.getParcelDto().getId());
+        assertEquals(0, createdOrder.getParcelDto().getWeight().compareTo(fetchedOrder.getParcelDto().getWeight()));
+
+        // DeliveryDto assertions
+        DeliveryDto createdDeliveryDto = createdOrder.getDeliveryDto();
+        DeliveryDto fetchedDeliveryDto = fetchedOrder.getDeliveryDto();
+        assertEquals(createdDeliveryDto.getId(), fetchedDeliveryDto.getId());
+        double precision = 0.01;
+        assertTrue(TestUtil.areBigDecimalsEqual(
+                createdDeliveryDto.getPickupLatitude(),
+                fetchedDeliveryDto.getPickupLatitude(),
+                precision));
+        assertTrue(TestUtil.areBigDecimalsEqual(
+                createdDeliveryDto.getPickupLongitude(),
+                fetchedDeliveryDto.getPickupLongitude(),
+                precision));
+        assertEquals(createdDeliveryDto.getPickupTime(), fetchedDeliveryDto.getPickupTime());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_1_EMAIL, password = TEST_USER_1_PWD, roles = "USER")
+    void getUserOrdersEmptyList() {
+        List<OrderDto> fetchedOrders = orderService.getUserOrders();
+        assertNotNull(fetchedOrders);
+        assertTrue(fetchedOrders.isEmpty());
     }
 
     private OrderDto getOrderReq(long SENDER_ID) {
