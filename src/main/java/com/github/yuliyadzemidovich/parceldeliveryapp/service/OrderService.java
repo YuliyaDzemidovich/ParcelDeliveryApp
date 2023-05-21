@@ -1,6 +1,8 @@
 package com.github.yuliyadzemidovich.parceldeliveryapp.service;
 
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.OrderDto;
+import com.github.yuliyadzemidovich.parceldeliveryapp.entity.OrderStatus;
+import com.github.yuliyadzemidovich.parceldeliveryapp.exception.WebException;
 
 import java.util.List;
 
@@ -18,4 +20,19 @@ public interface OrderService {
      * @return list of orders
      */
     List<OrderDto> getUserOrders();
+
+    /**
+     * Try cancel user's order by order ID
+     * @param orderId order ID
+     * @return cancelled order if was successfully cancelled
+     * @throws WebException if unable to cancel order
+     */
+    OrderDto cancelOrder(long orderId);
+
+    /**
+     * Defines business rule if order can be canceled or not.
+     * @param order order to be canceled
+     * @return true if order can be canceled, false otherwise
+     */
+    boolean canBeCanceled(OrderStatus order);
 }

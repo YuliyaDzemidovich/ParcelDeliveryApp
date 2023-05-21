@@ -8,8 +8,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -35,5 +37,11 @@ public class OrderController {
     @GetMapping(path =  USER + ORDERS)
     public List<OrderDto> getUserOrders() {
         return orderService.getUserOrders();
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping(path = USER + ORDERS + "/cancel")
+    public OrderDto cancelOrder(@RequestParam long orderId) {
+        return orderService.cancelOrder(orderId);
     }
 }

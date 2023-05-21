@@ -6,9 +6,11 @@ import com.github.yuliyadzemidovich.parceldeliveryapp.config.SecurityConfig;
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.DeliveryDto;
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.OrderDto;
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.ParcelDto;
+import com.github.yuliyadzemidovich.parceldeliveryapp.entity.Order;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.OrderStatus;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.User;
 import com.github.yuliyadzemidovich.parceldeliveryapp.exception.ValidationException;
+import com.github.yuliyadzemidovich.parceldeliveryapp.exception.WebException;
 import com.github.yuliyadzemidovich.parceldeliveryapp.repository.OrderRepository;
 import com.github.yuliyadzemidovich.parceldeliveryapp.repository.UserRepository;
 import com.github.yuliyadzemidovich.parceldeliveryapp.service.OrderService;
@@ -29,6 +31,8 @@ import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.TEST_SUPER
 import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.TEST_USER_1_EMAIL;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.TEST_USER_1_PWD;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.service.impl.OrderServiceImpl.MISMATCH_SENDER_ID_AND_AUTH_USER_ID;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.service.impl.OrderServiceImpl.ORDER_CANT_BE_CANCELED;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.service.impl.OrderServiceImpl.ORDER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -161,6 +165,86 @@ class OrderServiceIntegrationTest {
         List<OrderDto> fetchedOrders = orderService.getUserOrders();
         assertNotNull(fetchedOrders);
         assertTrue(fetchedOrders.isEmpty());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_1_EMAIL, password = TEST_USER_1_PWD, roles = "USER")
+    void cancelOrder() {
+        User sender = TestUtil.getUser1();
+        sender = userRepo.findByEmail(sender.getEmail());
+        long senderId = sender.getId();
+
+        // pre create order
+        OrderDto orderReq = getOrderReq(senderId);
+        OrderDto createdOrder = orderService.createOrder(orderReq);
+
+        // method under test
+        OrderDto canceledOrder = orderService.cancelOrder(createdOrder.getId());
+        assertNotNull(canceledOrder);
+        assertEquals(createdOrder.getId(), canceledOrder.getId());
+        assertEquals(OrderStatus.CANCELLED, canceledOrder.getStatus());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_1_EMAIL, password = TEST_USER_1_PWD, roles = "USER")
+    void cancelOrderTooLate() {
+        User sender = TestUtil.getUser1();
+        sender = userRepo.findByEmail(sender.getEmail());
+        long senderId = sender.getId();
+
+        // pre create order
+        OrderDto orderReq = getOrderReq(senderId);
+        OrderDto createdOrder = orderService.createOrder(orderReq);
+
+        // change order status to RUNNING
+        Long orderId = createdOrder.getId();
+        Order existingOrder = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Can't find pre created order by ID"));
+        existingOrder.setStatus(OrderStatus.RUNNING);
+        orderRepo.save(existingOrder);
+
+        // method under test
+        WebException ex = assertThrows(
+                WebException.class,
+                () -> orderService.cancelOrder(orderId)
+        );
+        assertTrue(ex.getMessage().contentEquals(String.format(ORDER_CANT_BE_CANCELED, orderId)));
+    }
+
+    /**
+     * When order belongs to user 2
+     * and user 1 tries to cancel the order,
+     * then throw order not found exception.
+     */
+    @Test
+    @WithMockUser(username = TEST_USER_1_EMAIL, password = TEST_USER_1_PWD, roles = "USER")
+    void cancelOrderOfAnotherUser() {
+        User sender = TestUtil.getUser1();
+        sender = userRepo.findByEmail(sender.getEmail());
+        long senderId = sender.getId();
+
+        // pre create order
+        OrderDto orderReq = getOrderReq(senderId);
+        OrderDto createdOrder = orderService.createOrder(orderReq);
+
+        // change order status to RUNNING
+        Long orderId = createdOrder.getId();
+        Order existingOrder = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Can't find pre created order by ID"));
+        existingOrder.setStatus(OrderStatus.RUNNING);
+
+        // change order sender (emulate like it was initially created by user 2)
+        sender = TestUtil.getUser2();
+        sender = userRepo.findByEmail(sender.getEmail());
+        existingOrder.setSender(sender);
+        orderRepo.save(existingOrder);
+
+        // method under test - authed user 1 tries to cancel order of user 2
+        WebException ex = assertThrows(
+                WebException.class,
+                () -> orderService.cancelOrder(orderId)
+        );
+        assertTrue(ex.getMessage().contentEquals(String.format(ORDER_NOT_FOUND, orderId)));
     }
 
     private OrderDto getOrderReq(long SENDER_ID) {

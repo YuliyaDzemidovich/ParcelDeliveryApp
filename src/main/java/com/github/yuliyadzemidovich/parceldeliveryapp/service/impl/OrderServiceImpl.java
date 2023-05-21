@@ -38,6 +38,8 @@ import static com.github.yuliyadzemidovich.parceldeliveryapp.entity.Role.ROLE_SU
 public class OrderServiceImpl implements OrderService {
 
     static final String MISMATCH_SENDER_ID_AND_AUTH_USER_ID = "Sender ID must match authenticated user ID";
+    static final String ORDER_NOT_FOUND = "Order with ID = %s not found";
+    static final String ORDER_CANT_BE_CANCELED = "Order with ID = %s cannot be canceled at this stage";
 
     private final OrderRepository orderRepo;
     private final UserRepository userRepo;
@@ -96,14 +98,39 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDto> getUserOrders() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String authedUserEmail = auth.getName();
-        long authedUserId = userRepo.findByEmail(authedUserEmail).getId();
+        long authedUserId = getAuthedUserId();
         List<Order> orders = orderRepo.findAllBySenderId(authedUserId);
         if (CollectionUtils.isEmpty(orders)) {
             return new ArrayList<>();
         }
         return orders.stream().map(this::map).toList();
+    }
+
+    private long getAuthedUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String authedUserEmail = auth.getName();
+        return userRepo.findByEmail(authedUserEmail).getId();
+    }
+
+    @Override
+    public OrderDto cancelOrder(long orderId) {
+        long authedUserId = getAuthedUserId();
+        Optional<Order> orderOpt = orderRepo.findById(orderId);
+        if (orderOpt.isEmpty() || authedUserId != orderOpt.get().getSender().getId()) {
+            throw new WebException(String.format(ORDER_NOT_FOUND, orderId), HttpStatus.NOT_FOUND);
+        }
+        Order order = orderOpt.get();
+        if (!canBeCanceled(order.getStatus())) {
+            throw new WebException(String.format(ORDER_CANT_BE_CANCELED, orderId), HttpStatus.BAD_REQUEST);
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        order = orderRepo.save(order);
+        return map(order);
+    }
+
+    @Override
+    public boolean canBeCanceled(OrderStatus order) {
+        return order == OrderStatus.NEW || order == OrderStatus.CANCELLED;
     }
 
     private boolean isUserSuperAdmin(Authentication auth) {
