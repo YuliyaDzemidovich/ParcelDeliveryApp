@@ -21,8 +21,15 @@
         </rollingPolicy>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="Console" />
-        <appender-ref ref="RollingFile" />
-    </root>
+    <springProfile name="local">
+        <root level="DEBUG">
+            <appender-ref ref="Console" />
+        </root>
+    </springProfile>
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="Console" />
+            <appender-ref ref="RollingFile" />
+        </root>
+    </springProfile>
 </configuration>
