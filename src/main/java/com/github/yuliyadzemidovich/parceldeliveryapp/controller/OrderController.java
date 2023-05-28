@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +38,12 @@ public class OrderController {
     @GetMapping(path =  USER + ORDERS)
     public List<OrderDto> getUserOrders() {
         return orderService.getUserOrders();
+    }
+
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'USER')")
+    @GetMapping(path = USER + ORDERS + "/{orderId}")
+    public OrderDto getOrderById(@PathVariable long orderId) {
+        return orderService.getOrderById(orderId);
     }
 
     @PreAuthorize("hasRole('USER')")

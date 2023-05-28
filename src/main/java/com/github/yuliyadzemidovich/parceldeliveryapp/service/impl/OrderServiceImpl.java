@@ -133,6 +133,23 @@ public class OrderServiceImpl implements OrderService {
         return order == OrderStatus.NEW || order == OrderStatus.CANCELLED;
     }
 
+    @Override
+    public OrderDto getOrderById(long orderId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Optional<Order> orderOpt = orderRepo.findById(orderId);
+        if (orderOpt.isEmpty()) {
+            throw new WebException(String.format(ORDER_NOT_FOUND, orderId), HttpStatus.NOT_FOUND);
+        }
+        Order order = orderOpt.get();
+        if (!isUserSuperAdmin(auth)) {
+            long authedUserId = getAuthedUserId();
+            if (authedUserId != order.getSender().getId()) {
+                throw new WebException(String.format(ORDER_NOT_FOUND, orderId), HttpStatus.NOT_FOUND);
+            }
+        }
+        return map(order);
+    }
+
     private boolean isUserSuperAdmin(Authentication auth) {
         Optional<? extends GrantedAuthority> superAdminAuthority = auth.getAuthorities().stream()
                 .filter(ga -> ROLE_SUPER_ADMIN.getSecurityValue().equals(ga.getAuthority())).findFirst();
@@ -148,10 +165,16 @@ public class OrderServiceImpl implements OrderService {
         Delivery delivery = order.getDelivery();
         DeliveryDto deliveryDto = DeliveryDto.builder()
                 .id(delivery.getId())
-                .pickupTime(delivery.getPickupTime().toString())
-                .pickupLatitude(delivery.getPickupLatitude().toString())
-                .pickupLongitude(delivery.getPickupLongitude().toString())
                 .build();
+        if (delivery.getPickupTime() != null) {
+            deliveryDto.setPickupTime(delivery.getPickupTime().toString());
+        }
+        if (delivery.getPickupLatitude() != null) {
+            deliveryDto.setPickupLatitude(delivery.getPickupLatitude().toString());
+        }
+        if (delivery.getPickupLongitude() != null) {
+            deliveryDto.setPickupLongitude(delivery.getPickupLongitude().toString());
+        }
         return OrderDto.builder()
                 .id(order.getId())
                 .receiverPhone(order.getReceiverPhone())

@@ -35,4 +35,11 @@ public interface OrderService {
      * @return true if order can be canceled, false otherwise
      */
     boolean canBeCanceled(OrderStatus order);
+
+    /**
+     * Get order by ID. For USER role, order must belong to the authorized user.
+     * @param orderId order ID
+     * @return found order
+     */
+    OrderDto getOrderById(long orderId);
 }
