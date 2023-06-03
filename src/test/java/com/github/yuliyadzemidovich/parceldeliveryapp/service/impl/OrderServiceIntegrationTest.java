@@ -247,6 +247,30 @@ class OrderServiceIntegrationTest {
         assertTrue(ex.getMessage().contentEquals(String.format(ORDER_NOT_FOUND, orderId)));
     }
 
+    @Test
+    @WithMockUser(username = TEST_USER_1_EMAIL, password = TEST_USER_1_PWD, roles = "USER")
+    void cancelAllOrders() {
+        User sender = TestUtil.getUser1();
+        sender = userRepo.findByEmail(sender.getEmail());
+        long senderId = sender.getId();
+
+        // pre create orders
+        OrderDto orderReq = getOrderReq(senderId);
+        orderService.createOrder(orderReq); // order1
+        orderService.createOrder(orderReq); // order2
+
+        // method under test
+        orderService.cancelAllOrders();
+        List<Order> updatedOrders = orderRepo.findAllBySenderId(senderId);
+        assertNotNull(updatedOrders);
+        assertEquals(2, updatedOrders.size());
+        assertAll(() -> {
+            for (Order order : updatedOrders) {
+                assertEquals(OrderStatus.CANCELLED, order.getStatus());
+            }
+        });
+    }
+
     private OrderDto getOrderReq(long SENDER_ID) {
         ParcelDto parcelDto = ParcelDto.builder()
                 .weight(new BigDecimal(5))

@@ -1,7 +1,7 @@
 package com.github.yuliyadzemidovich.parceldeliveryapp.service;
 
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.OrderDto;
-import com.github.yuliyadzemidovich.parceldeliveryapp.entity.OrderStatus;
+import com.github.yuliyadzemidovich.parceldeliveryapp.entity.Order;
 import com.github.yuliyadzemidovich.parceldeliveryapp.exception.WebException;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public interface OrderService {
      * @param order order to be canceled
      * @return true if order can be canceled, false otherwise
      */
-    boolean canBeCanceled(OrderStatus order);
+    boolean canBeCanceled(Order order);
 
     /**
      * Get order by ID. For USER role, order must belong to the authorized user.
@@ -42,4 +42,11 @@ public interface OrderService {
      * @return found order
      */
     OrderDto getOrderById(long orderId);
+
+    /**
+     * Try cancel all orders of currently authenticated user.
+     * All orders must belong to the authenticated user.
+     * @throws WebException if unable to cancel orders
+     */
+    void cancelAllOrders();
 }

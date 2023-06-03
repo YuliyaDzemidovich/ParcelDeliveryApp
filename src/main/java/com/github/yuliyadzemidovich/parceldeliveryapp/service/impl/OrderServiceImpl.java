@@ -15,6 +15,7 @@ import com.github.yuliyadzemidovich.parceldeliveryapp.repository.UserRepository;
 import com.github.yuliyadzemidovich.parceldeliveryapp.service.OrderService;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,10 +36,12 @@ import static com.github.yuliyadzemidovich.parceldeliveryapp.entity.Role.ROLE_SU
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     static final String MISMATCH_SENDER_ID_AND_AUTH_USER_ID = "Sender ID must match authenticated user ID";
     static final String ORDER_NOT_FOUND = "Order with ID = %s not found";
+    static final String ORDERS_NOT_FOUND = "No orders found";
     static final String ORDER_CANT_BE_CANCELED = "Order with ID = %s cannot be canceled at this stage";
 
     private final OrderRepository orderRepo;
@@ -93,6 +96,7 @@ public class OrderServiceImpl implements OrderService {
         order.setReceiverAddress(orderDto.getReceiverAddress());
         order.setReceiverPhone(orderDto.getReceiverPhone());
         Order savedOrder = orderRepo.save(order);
+        log.info("Created new order with id={} for senderId={}", savedOrder.getId(), savedOrder.getSender().getId());
         return map(savedOrder);
     }
 
@@ -113,6 +117,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto cancelOrder(long orderId) {
         long authedUserId = getAuthedUserId();
         Optional<Order> orderOpt = orderRepo.findById(orderId);
@@ -120,17 +125,21 @@ public class OrderServiceImpl implements OrderService {
             throw new WebException(String.format(ORDER_NOT_FOUND, orderId), HttpStatus.NOT_FOUND);
         }
         Order order = orderOpt.get();
-        if (!canBeCanceled(order.getStatus())) {
+        if (!canBeCanceled(order)) {
+            log.error("Cannot cancel order {} for user {} - order is past canceling conditions, orderStatus={}",
+                    orderId, authedUserId, order.getStatus().toString());
             throw new WebException(String.format(ORDER_CANT_BE_CANCELED, orderId), HttpStatus.BAD_REQUEST);
         }
         order.setStatus(OrderStatus.CANCELLED);
         order = orderRepo.save(order);
+        log.info("Canceled order {} for user {}", orderId, authedUserId);
         return map(order);
     }
 
     @Override
-    public boolean canBeCanceled(OrderStatus order) {
-        return order == OrderStatus.NEW || order == OrderStatus.CANCELLED;
+    public boolean canBeCanceled(Order order) {
+        OrderStatus orderStatus = order.getStatus();
+        return orderStatus == OrderStatus.NEW || orderStatus == OrderStatus.CANCELLED;
     }
 
     @Override
@@ -148,6 +157,25 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return map(order);
+    }
+
+    @Override
+    @Transactional
+    public void cancelAllOrders() {
+        long authedUserId = getAuthedUserId();
+        List<Order> orders = orderRepo.findAllBySenderId(authedUserId);
+        if (orders.isEmpty()) {
+            throw new WebException(ORDERS_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+        int canceledAmount = 0;
+        for (Order order : orders) {
+            if (canBeCanceled(order)) {
+                order.setStatus(OrderStatus.CANCELLED);
+                canceledAmount++;
+            }
+        }
+        log.info("Canceled {} orders by user {} request cancelAllOrders", canceledAmount, authedUserId);
+        orderRepo.saveAll(orders);
     }
 
     private boolean isUserSuperAdmin(Authentication auth) {

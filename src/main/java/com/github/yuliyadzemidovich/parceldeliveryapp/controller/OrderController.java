@@ -51,4 +51,10 @@ public class OrderController {
     public OrderDto cancelOrder(@RequestParam long orderId) {
         return orderService.cancelOrder(orderId);
     }
+
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping(path = USER + ORDERS + "/cancelAll")
+    public void cancelAllOrder() {
+        orderService.cancelAllOrders();
+    }
 }
