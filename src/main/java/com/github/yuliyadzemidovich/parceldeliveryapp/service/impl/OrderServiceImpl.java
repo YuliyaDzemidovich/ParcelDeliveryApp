@@ -43,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
     static final String ORDER_NOT_FOUND = "Order with ID = %s not found";
     static final String ORDERS_NOT_FOUND = "No orders found";
     static final String ORDER_CANT_BE_CANCELED = "Order with ID = %s cannot be canceled at this stage";
+    static final String ORDER_CANT_BE_UPDATED = "Order with ID = %s cannot be updated at this stage";
 
     private final OrderRepository orderRepo;
     private final UserRepository userRepo;
@@ -120,11 +121,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderDto cancelOrder(long orderId) {
         long authedUserId = getAuthedUserId();
-        Optional<Order> orderOpt = orderRepo.findById(orderId);
-        if (orderOpt.isEmpty() || authedUserId != orderOpt.get().getSender().getId()) {
-            throw new WebException(String.format(ORDER_NOT_FOUND, orderId), HttpStatus.NOT_FOUND);
-        }
-        Order order = orderOpt.get();
+        Order order = getOrderBySenderId(orderId, authedUserId);
         if (!canBeCanceled(order)) {
             log.error("Cannot cancel order {} for user {} - order is past canceling conditions, orderStatus={}",
                     orderId, authedUserId, order.getStatus().toString());
@@ -176,6 +173,35 @@ public class OrderServiceImpl implements OrderService {
         }
         log.info("Canceled {} orders by user {} request cancelAllOrders", canceledAmount, authedUserId);
         orderRepo.saveAll(orders);
+    }
+
+    @Override
+    @Transactional
+    public OrderDto updateDeliveryAddress(long orderId, String newAddress) {
+        long authedUserId = getAuthedUserId();
+        Order order = getOrderBySenderId(orderId, authedUserId);
+        if (!canDeliveryAddressBeUpdated(order)) {
+            log.error("Cannot update address for order {} for user {} - order is past updating conditions, orderStatus={}",
+                    orderId, authedUserId, order.getStatus().toString());
+            throw new WebException(String.format(ORDER_CANT_BE_UPDATED, orderId), HttpStatus.BAD_REQUEST);
+        }
+        order.setReceiverAddress(newAddress);
+        order = orderRepo.save(order);
+        log.info("Updated order {} for user {}", orderId, authedUserId);
+        return map(order);
+    }
+
+    private Order getOrderBySenderId(long orderId, long authedUserId) {
+        Optional<Order> orderOpt = orderRepo.findById(orderId);
+        if (orderOpt.isEmpty() || authedUserId != orderOpt.get().getSender().getId()) {
+            throw new WebException(String.format(ORDER_NOT_FOUND, orderId), HttpStatus.NOT_FOUND);
+        }
+        return orderOpt.get();
+    }
+
+    private boolean canDeliveryAddressBeUpdated(Order order) {
+        OrderStatus orderStatus = order.getStatus();
+        return orderStatus == OrderStatus.NEW || orderStatus == OrderStatus.RUNNING;
     }
 
     private boolean isUserSuperAdmin(Authentication auth) {
