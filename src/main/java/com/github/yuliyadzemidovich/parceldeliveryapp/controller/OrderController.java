@@ -3,6 +3,8 @@ package com.github.yuliyadzemidovich.parceldeliveryapp.controller;
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.OrderDto;
 import com.github.yuliyadzemidovich.parceldeliveryapp.service.OrderService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +34,13 @@ public class OrderController {
     @PostMapping(path =  USER + ORDERS, consumes = MediaType.APPLICATION_JSON_VALUE)
     public OrderDto createOrder(@RequestBody @Valid OrderDto orderDto) {
         return orderService.createOrder(orderDto);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping(path = USER + ORDERS + "/{orderId}")
+    public OrderDto updateDeliveryAddress(@PathVariable long orderId,
+                                          @RequestBody @NotBlank @Size(max = 255) String newAddress) {
+        return orderService.updateDeliveryAddress(orderId, newAddress);
     }
 
     @PreAuthorize("hasRole('USER')")

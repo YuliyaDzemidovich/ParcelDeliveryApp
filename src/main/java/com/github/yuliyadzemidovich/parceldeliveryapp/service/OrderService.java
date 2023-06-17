@@ -49,4 +49,12 @@ public interface OrderService {
      * @throws WebException if unable to cancel orders
      */
     void cancelAllOrders();
+
+    /**
+     * Update delivery address for existing order
+     * @param orderId order ID
+     * @param newAddress new address
+     * @return updated order
+     */
+    OrderDto updateDeliveryAddress(long orderId, String newAddress);
 }

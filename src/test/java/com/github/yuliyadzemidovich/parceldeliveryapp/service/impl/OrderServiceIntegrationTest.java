@@ -32,6 +32,7 @@ import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.TEST_USER_
 import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.TEST_USER_1_PWD;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.service.impl.OrderServiceImpl.MISMATCH_SENDER_ID_AND_AUTH_USER_ID;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.service.impl.OrderServiceImpl.ORDER_CANT_BE_CANCELED;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.service.impl.OrderServiceImpl.ORDER_CANT_BE_UPDATED;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.service.impl.OrderServiceImpl.ORDER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -165,6 +166,53 @@ class OrderServiceIntegrationTest {
         List<OrderDto> fetchedOrders = orderService.getUserOrders();
         assertNotNull(fetchedOrders);
         assertTrue(fetchedOrders.isEmpty());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_1_EMAIL, password = TEST_USER_1_PWD, roles = "USER")
+    void updateDeliveryAddress() {
+        String NEW_ADDRESS = "mocked new address for current order";
+
+        // pre create order
+        User sender = TestUtil.getUser1();
+        sender = userRepo.findByEmail(sender.getEmail());
+        long senderId = sender.getId();
+        OrderDto orderReq = getOrderReq(senderId);
+        OrderDto createdOrder = orderService.createOrder(orderReq);
+        assertNotEquals(NEW_ADDRESS, createdOrder.getReceiverAddress());
+
+        // method under test
+        OrderDto updatedOrder = orderService.updateDeliveryAddress(createdOrder.getId(), NEW_ADDRESS);
+        assertNotNull(updatedOrder);
+        assertEquals(NEW_ADDRESS, updatedOrder.getReceiverAddress());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_1_EMAIL, password = TEST_USER_1_PWD, roles = "USER")
+    void updateDeliveryAddressTooLate() {
+        String NEW_ADDRESS = "mocked new address for current order";
+
+        // pre create order
+        User sender = TestUtil.getUser1();
+        sender = userRepo.findByEmail(sender.getEmail());
+        long senderId = sender.getId();
+        OrderDto orderReq = getOrderReq(senderId);
+        OrderDto createdOrder = orderService.createOrder(orderReq);
+        assertNotEquals(NEW_ADDRESS, createdOrder.getReceiverAddress());
+
+        // change order status to DELIVERED
+        Long orderId = createdOrder.getId();
+        Order existingOrder = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Can't find pre created order by ID"));
+        existingOrder.setStatus(OrderStatus.DELIVERED);
+        orderRepo.save(existingOrder);
+
+        // method under test
+        WebException ex = assertThrows(
+                WebException.class,
+                () -> orderService.updateDeliveryAddress(orderId, NEW_ADDRESS)
+        );
+        assertTrue(ex.getMessage().contentEquals(String.format(ORDER_CANT_BE_UPDATED, orderId)));
     }
 
     @Test
