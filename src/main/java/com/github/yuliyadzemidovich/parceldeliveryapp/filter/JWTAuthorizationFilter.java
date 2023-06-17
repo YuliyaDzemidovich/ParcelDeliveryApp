@@ -56,10 +56,6 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
-            chain.doFilter(req, res);
-            return;
-        }
         String jwt = extractToken(authorizationHeader);
         if (!jwtService.isValidToken(jwt)) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
