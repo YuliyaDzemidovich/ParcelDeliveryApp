@@ -1,8 +1,8 @@
 package com.github.yuliyadzemidovich.parceldeliveryapp.filter;
 
 import com.github.yuliyadzemidovich.parceldeliveryapp.ParcelDeliveryAppApplication;
+import com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil;
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.OrderDto;
-import com.github.yuliyadzemidovich.parceldeliveryapp.entity.Role;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.User;
 import com.github.yuliyadzemidovich.parceldeliveryapp.repository.UserRepository;
 import com.github.yuliyadzemidovich.parceldeliveryapp.service.JwtService;
@@ -114,17 +114,12 @@ class JWTAuthorizationFilterIntegrationTest {
         // mock JWT token successful validation
         String validToken = "mocked.jwt.token";
         when(jwtServiceMock.isValidToken(validToken)).thenReturn(true);
-        String existingEmail = "test_user@email.com";
+        User existingUser = TestUtil.getExistingUser();
+        String existingEmail = existingUser.getEmail();
         when(jwtServiceMock.extractUserEmail(validToken)).thenReturn(existingEmail);
 
         // mock user exists in the database
         when(userRepoMock.existsByEmail(existingEmail)).thenReturn(true);
-        User existingUser = new User();
-        existingUser.setId(1L);
-        existingUser.setEmail(existingEmail);
-        existingUser.setRole(Role.ROLE_USER);
-        existingUser.setName("test username");
-        existingUser.setPassword("test password");
         when(userRepoMock.findByEmail(existingEmail)).thenReturn(existingUser);
 
         HttpHeaders headers = new HttpHeaders();

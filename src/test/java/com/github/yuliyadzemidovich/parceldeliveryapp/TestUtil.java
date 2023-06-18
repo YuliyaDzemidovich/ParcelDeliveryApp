@@ -36,6 +36,12 @@ public class TestUtil {
         return user;
     }
 
+    public static User getExistingUser() {
+        User user = getUser1();
+        user.setId(1L);
+        return user;
+    }
+
     public static User getSuperAdmin() {
         User user = new User();
         user.setName("SuperAdmin");
