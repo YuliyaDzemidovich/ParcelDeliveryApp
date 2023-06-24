@@ -11,16 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_REGISTER;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.USER;
 
 @RestController
-@RequestMapping(API_VERSION + USER)
+@RequestMapping(value = API_VERSION + USER, produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PATH_REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE)
     public UserDto register(@RequestBody @Valid UserDto userDto) {
         return userService.createUser(userDto);
     }

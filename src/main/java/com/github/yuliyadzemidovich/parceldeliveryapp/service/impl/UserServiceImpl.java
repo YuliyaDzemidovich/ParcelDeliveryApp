@@ -21,6 +21,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private static final String MSG_ROLE_NOT_FOUND = "User role not recognized";
+    private static final String MSG_CREATING_USER_WITH_EXACT_ID_NOT_ALLOWED = "Cannot create user with specific ID - please remove ID from the body";
 
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
@@ -37,9 +38,15 @@ public class UserServiceImpl implements UserService {
         return createAnyUser(userDto);
     }
 
+    @Override
+    public UserDto createAdmin(UserDto userDto) {
+        userDto.setRole(Role.ROLE_ADMIN.getShortValue());
+        return createAnyUser(userDto);
+    }
+
     private UserDto createAnyUser(UserDto userDto) {
         if (userDto.getId() != null) {
-            throw new ValidationException("Cannot create user with specific ID - please remove ID from the body", HttpStatus.BAD_REQUEST);
+            throw new ValidationException(MSG_CREATING_USER_WITH_EXACT_ID_NOT_ALLOWED, HttpStatus.BAD_REQUEST);
         }
         User user = DtoMapper.mapToUser(userDto);
         verifyAndMapRole(userDto, user);

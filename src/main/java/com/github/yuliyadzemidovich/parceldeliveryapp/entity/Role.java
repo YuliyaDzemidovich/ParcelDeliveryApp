@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 /**
  * Represent roles for this application.
  * {@link #securityValue} is meant for use with Spring Security and to store it in the database;
- * {@link #shortValue} is meanth for use in the request for create or manage users - this is the value to be shown to the client.
+ * {@link #shortValue} is meant for use in the request for create or manage users - this is the value to be shown to the client.
  */
 @Getter
 public enum Role {

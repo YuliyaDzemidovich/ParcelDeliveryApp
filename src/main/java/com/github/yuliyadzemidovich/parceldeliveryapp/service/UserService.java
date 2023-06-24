@@ -22,4 +22,11 @@ public interface UserService {
      * @return DTO of created user
      */
     UserDto createCourier(UserDto userDto);
+
+    /**
+     * Admin can create a new user with role ADMIN
+     * @param userDto dto with new user info
+     * @return DTO of created user
+     */
+    UserDto createAdmin(UserDto userDto);
 }
