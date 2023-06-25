@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.COURIER;
-import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_REGISTER;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.REGISTER;
 
 @RestController
 @RequestMapping(value = API_VERSION + COURIER, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -22,7 +22,7 @@ public class CourierController {
     private final UserService userService;
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
-    @PostMapping(value = PATH_REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE)
     public UserDto register(@RequestBody @Valid UserDto userDto) {
         return userService.createCourier(userDto);
     }

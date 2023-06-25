@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.ADMIN;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.USER;
 
 /**
  * Dummy controller for demo and testing purposes.
@@ -24,13 +26,13 @@ public class HelloController {
      * Should throw 4xx for unauthenticated user.
      */
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','USER')")
-    @GetMapping("/user")
+    @GetMapping(USER)
     public String helloUser() {
         return helloService.greetUser();
     }
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
-    @GetMapping("/admin")
+    @GetMapping(ADMIN)
     public String helloAdmin() {
         return helloService.greetAdmin();
     }

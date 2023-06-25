@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
-import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_LOGIN;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.LOGIN;
 
 @RestController
-@RequestMapping(API_VERSION + PATH_LOGIN)
+@RequestMapping(API_VERSION + LOGIN)
 @RequiredArgsConstructor
 public class LoginController {
 

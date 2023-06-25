@@ -10,15 +10,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    private static final String MSG_EXCEPTION_CAUGHT = "Exception caught: ";
+
     @ExceptionHandler(WebException.class)
     public ResponseEntity<String> handleException(WebException e) {
-        log.error("Exception caught: ", e);
+        log.error(MSG_EXCEPTION_CAUGHT, e);
         return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }
 
     @ExceptionHandler(ParcelDeliveryAppException.class)
     public ResponseEntity<String> handleException(Exception e) {
-        log.error("Exception caught: ", e);
+        log.error(MSG_EXCEPTION_CAUGHT, e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 }

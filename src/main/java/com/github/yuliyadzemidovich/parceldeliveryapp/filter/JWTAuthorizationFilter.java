@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,8 +21,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
-import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_LOGIN;
-import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_REGISTER;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_ACTUATOR_HEALTH;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.LOGIN;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.REGISTER;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.USER;
 
 /**
@@ -53,7 +55,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(req, res);
             return;
         }
-        final String authorizationHeader = req.getHeader("Authorization");
+        final String authorizationHeader = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -83,8 +85,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private boolean inAllowedList(String path) {
-        return path.startsWith("/actuator/health")
-                || path.startsWith(API_VERSION + PATH_LOGIN)
-                || path.startsWith(API_VERSION + USER + PATH_REGISTER);
+        return path.startsWith(PATH_ACTUATOR_HEALTH)
+                || path.startsWith(API_VERSION + LOGIN)
+                || path.startsWith(API_VERSION + USER + REGISTER);
     }
 }

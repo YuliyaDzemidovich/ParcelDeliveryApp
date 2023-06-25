@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.CANCEL;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.CANCEL_ALL;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.ORDERS;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PARAM_ORDER_ID;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.USER;
 
 @RestController
@@ -37,7 +40,7 @@ public class OrderController {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PutMapping(path = USER + ORDERS + "/{orderId}")
+    @PutMapping(path = USER + ORDERS + PARAM_ORDER_ID)
     public OrderDto updateDeliveryAddress(@PathVariable long orderId,
                                           @RequestBody @NotBlank @Size(max = 255) String newAddress) {
         return orderService.updateDeliveryAddress(orderId, newAddress);
@@ -50,19 +53,19 @@ public class OrderController {
     }
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'USER')")
-    @GetMapping(path = USER + ORDERS + "/{orderId}")
+    @GetMapping(path = USER + ORDERS + PARAM_ORDER_ID)
     public OrderDto getOrderById(@PathVariable long orderId) {
         return orderService.getOrderById(orderId);
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PutMapping(path = USER + ORDERS + "/cancel")
+    @PutMapping(path = USER + ORDERS + CANCEL)
     public OrderDto cancelOrder(@RequestParam long orderId) {
         return orderService.cancelOrder(orderId);
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PutMapping(path = USER + ORDERS + "/cancelAll")
+    @PutMapping(path = USER + ORDERS + CANCEL_ALL)
     public void cancelAllOrder() {
         orderService.cancelAllOrders();
     }

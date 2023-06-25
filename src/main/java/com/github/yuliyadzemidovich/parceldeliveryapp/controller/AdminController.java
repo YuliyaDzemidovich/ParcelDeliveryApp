@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.ADMIN;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
-import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_REGISTER;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.REGISTER;
 
 @RestController
 @RequestMapping(value = API_VERSION + ADMIN, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -23,7 +23,7 @@ public class AdminController {
     private final UserService userService;
 
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    @PostMapping(value = PATH_REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE)
     public UserDto register(@RequestBody @Valid UserDto userDto) {
         return userService.createAdmin(userDto);
     }

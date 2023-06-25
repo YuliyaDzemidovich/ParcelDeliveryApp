@@ -26,6 +26,7 @@ import java.util.Date;
 @Slf4j
 public class JwtServiceImpl implements JwtService {
 
+    private static final String MSG_EX_PARSING_JWT = "Exception parsing JWT";
     @Value("${jwt.shared.secret}")
     protected byte[] sharedSecret;
 
@@ -85,7 +86,7 @@ public class JwtServiceImpl implements JwtService {
                 return false;
             }
         } catch (ParseException | JOSEException e) {
-            log.error("Exception parsing JWT", e);
+            log.error(MSG_EX_PARSING_JWT, e);
             return false;
         }
         return true;
@@ -99,7 +100,7 @@ public class JwtServiceImpl implements JwtService {
             JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
             return jwtClaimsSet.getSubject();
         } catch (ParseException e) {
-            log.error("Exception parsing JWT", e);
+            log.error(MSG_EX_PARSING_JWT, e);
             throw new ValidationException(e.getMessage());
         }
     }
