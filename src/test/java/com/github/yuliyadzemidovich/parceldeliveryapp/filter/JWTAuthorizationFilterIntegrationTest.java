@@ -26,6 +26,13 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.ORDERS;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_ACTUATOR_HEALTH;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PREFIX_BEARER;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.USER;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.MOCKED_JWT;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.TestUtil.TEST_NOT_EXISTING_EMAIL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -57,14 +64,14 @@ class JWTAuthorizationFilterIntegrationTest {
 
     @Test
     void allowedNoAuthRequest() {
-        String url = baseUrl + "/actuator/health";
+        String url = baseUrl + PATH_ACTUATOR_HEALTH;
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
     void forbiddenNoAuthRequest() {
-        String url = baseUrl + "/api/v1/user/orders";
+        String url = baseUrl + API_VERSION + USER + ORDERS;
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<Object> requestEntity = new HttpEntity<>(null, headers);
@@ -76,10 +83,10 @@ class JWTAuthorizationFilterIntegrationTest {
 
     @Test
     void invalidAuthJwtRequest() {
-        String url = baseUrl + "/api/v1/user/orders";
+        String url = baseUrl + API_VERSION + USER + ORDERS;
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.set(HttpHeaders.AUTHORIZATION, "Bearer fake.jwt.token");
+        headers.set(HttpHeaders.AUTHORIZATION, PREFIX_BEARER + MOCKED_JWT);
         HttpEntity<Object> requestEntity = new HttpEntity<>(null, headers);
         ResponseEntity<List<OrderDto>> response = restTemplate.exchange(
                 url, HttpMethod.GET, requestEntity, new ParameterizedTypeReference<>() { });
@@ -89,17 +96,16 @@ class JWTAuthorizationFilterIntegrationTest {
 
     @Test
     void unknownUserWithJwtRequest() {
-        String url = baseUrl + "/api/v1/user/orders";
+        String url = baseUrl + API_VERSION + USER + ORDERS;
 
         // mock JWT token successful validation
-        String validToken = "mocked.jwt.token";
+        String validToken = MOCKED_JWT;
         when(jwtServiceMock.isValidToken(validToken)).thenReturn(true);
-        String notExistingEmail = "fake@email.com";
-        when(jwtServiceMock.extractUserEmail(validToken)).thenReturn(notExistingEmail);
+        when(jwtServiceMock.extractUserEmail(validToken)).thenReturn(TEST_NOT_EXISTING_EMAIL);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + validToken);
+        headers.set(HttpHeaders.AUTHORIZATION, PREFIX_BEARER + validToken);
         HttpEntity<Object> requestEntity = new HttpEntity<>(null, headers);
         ResponseEntity<List<OrderDto>> response = restTemplate.exchange(
                 url, HttpMethod.GET, requestEntity, new ParameterizedTypeReference<>() { });
@@ -109,10 +115,10 @@ class JWTAuthorizationFilterIntegrationTest {
 
     @Test
     void allowedWithJwtRequest() {
-        String url = baseUrl + "/api/v1/user/orders";
+        String url = baseUrl + API_VERSION + USER + ORDERS;
 
         // mock JWT token successful validation
-        String validToken = "mocked.jwt.token";
+        String validToken = MOCKED_JWT;
         when(jwtServiceMock.isValidToken(validToken)).thenReturn(true);
         User existingUser = TestUtil.getExistingUser();
         String existingEmail = existingUser.getEmail();
@@ -124,7 +130,7 @@ class JWTAuthorizationFilterIntegrationTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + validToken);
+        headers.set(HttpHeaders.AUTHORIZATION, PREFIX_BEARER + validToken);
         HttpEntity<Object> requestEntity = new HttpEntity<>(null, headers);
         ResponseEntity<List<OrderDto>> response = restTemplate.exchange(
                 url, HttpMethod.GET, requestEntity, new ParameterizedTypeReference<>() { });

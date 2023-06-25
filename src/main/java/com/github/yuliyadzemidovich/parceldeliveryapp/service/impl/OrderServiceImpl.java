@@ -102,6 +102,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public List<OrderDto> getUserOrders() {
         long authedUserId = getAuthedUserId();
         List<Order> orders = orderRepo.findAllBySenderId(authedUserId);
@@ -112,6 +113,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public List<OrderDto> getAllOrders() {
         List<Order> orders = orderRepo.findAll();
         if (CollectionUtils.isEmpty(orders)) {
@@ -149,6 +151,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto getOrderById(long orderId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Optional<Order> orderOpt = orderRepo.findById(orderId);

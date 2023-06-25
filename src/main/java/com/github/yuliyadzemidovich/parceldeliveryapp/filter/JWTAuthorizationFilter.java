@@ -23,6 +23,7 @@ import java.io.IOException;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_ACTUATOR_HEALTH;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.LOGIN;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PREFIX_BEARER;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.REGISTER;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.USER;
 
@@ -56,7 +57,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             return;
         }
         final String authorizationHeader = req.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith(PREFIX_BEARER)) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

@@ -14,6 +14,8 @@ public class Constants {
     public static final String LOGIN = "/login";
     public static final String PATH_ACTUATOR_HEALTH = "/actuator/health";
     public static final String PARAM_ORDER_ID = "/{orderId}";
+    public static final String PREFIX_BEARER = "Bearer ";
+
 
     private Constants() {}
 }
