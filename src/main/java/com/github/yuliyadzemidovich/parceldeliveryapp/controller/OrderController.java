@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.ADMIN;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.CANCEL;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.CANCEL_ALL;
@@ -50,6 +51,12 @@ public class OrderController {
     @GetMapping(path =  USER + ORDERS)
     public List<OrderDto> getUserOrders() {
         return orderService.getUserOrders();
+    }
+
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    @GetMapping(path =  ADMIN + ORDERS)
+    public List<OrderDto> getAllOrders() {
+        return orderService.getAllOrders();
     }
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'USER')")

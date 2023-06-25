@@ -22,6 +22,12 @@ public interface OrderService {
     List<OrderDto> getUserOrders();
 
     /**
+     * Get all orders
+     * @return list of orders
+     */
+    List<OrderDto> getAllOrders();
+
+    /**
      * Try cancel user's order by order ID
      * @param orderId order ID
      * @return cancelled order if was successfully cancelled

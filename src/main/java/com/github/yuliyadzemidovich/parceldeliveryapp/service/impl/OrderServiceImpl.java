@@ -98,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
         order.setReceiverPhone(orderDto.getReceiverPhone());
         Order savedOrder = orderRepo.save(order);
         log.info("Created new order with id={} for senderId={}", savedOrder.getId(), savedOrder.getSender().getId());
-        return map(savedOrder);
+        return mapToOrderDto(savedOrder);
     }
 
     @Override
@@ -108,7 +108,16 @@ public class OrderServiceImpl implements OrderService {
         if (CollectionUtils.isEmpty(orders)) {
             return new ArrayList<>();
         }
-        return orders.stream().map(this::map).toList();
+        return orders.stream().map(this::mapToOrderDto).toList();
+    }
+
+    @Override
+    public List<OrderDto> getAllOrders() {
+        List<Order> orders = orderRepo.findAll();
+        if (CollectionUtils.isEmpty(orders)) {
+            return new ArrayList<>();
+        }
+        return orders.stream().map(this::mapToOrderDto).toList();
     }
 
     private long getAuthedUserId() {
@@ -130,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.CANCELLED);
         order = orderRepo.save(order);
         log.info("Canceled order {} for user {}", orderId, authedUserId);
-        return map(order);
+        return mapToOrderDto(order);
     }
 
     @Override
@@ -153,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new WebException(String.format(ORDER_NOT_FOUND, orderId), HttpStatus.NOT_FOUND);
             }
         }
-        return map(order);
+        return mapToOrderDto(order);
     }
 
     @Override
@@ -188,7 +197,7 @@ public class OrderServiceImpl implements OrderService {
         order.setReceiverAddress(newAddress);
         order = orderRepo.save(order);
         log.info("Updated order {} for user {}", orderId, authedUserId);
-        return map(order);
+        return mapToOrderDto(order);
     }
 
     private Order getOrderBySenderId(long orderId, long authedUserId) {
@@ -210,7 +219,7 @@ public class OrderServiceImpl implements OrderService {
         return superAdminAuthority.isPresent();
     }
 
-    private OrderDto map(Order order) {
+    private OrderDto mapToOrderDto(Order order) {
         Parcel parcel = order.getParcel();
         ParcelDto parcelDto = ParcelDto.builder()
                 .id(parcel.getId())
