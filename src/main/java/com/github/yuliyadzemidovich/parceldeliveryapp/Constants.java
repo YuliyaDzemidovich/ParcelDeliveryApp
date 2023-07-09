@@ -9,6 +9,8 @@ public class Constants {
     public static final String COURIER = "/courier";
     public static final String ORDERS = "/orders";
     public static final String CANCEL = "/cancel";
+    public static final String ADDRESS = "/address";
+    public static final String STATUS = "/status";
     public static final String CANCEL_ALL = "/cancelAll";
     public static final String REGISTER = "/register";
     public static final String LOGIN = "/login";

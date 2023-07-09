@@ -57,6 +57,14 @@ public interface OrderService {
     void cancelAllOrders();
 
     /**
+     * Change order status to a new value.
+     * @param orderId ID of order to be updated
+     * @param newStatus new status of order
+     * @return DTO with updated Order
+     */
+    OrderDto changeStatus(long orderId, String newStatus);
+
+    /**
      * Update delivery address for existing order
      * @param orderId order ID
      * @param newAddress new address

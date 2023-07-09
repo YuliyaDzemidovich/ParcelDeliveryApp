@@ -42,6 +42,7 @@ public class OrderServiceImpl implements OrderService {
     static final String MISMATCH_SENDER_ID_AND_AUTH_USER_ID = "Sender ID must match authenticated user ID";
     static final String ORDER_NOT_FOUND = "Order with ID = %s not found";
     static final String ORDERS_NOT_FOUND = "No orders found";
+    static final String ORDER_CANT_PARSE_STATUS_STR = "Can't parse new status string for orderId=%d";
     static final String ORDER_CANT_BE_CANCELED = "Order with ID = %s cannot be canceled at this stage";
     static final String ORDER_CANT_BE_UPDATED = "Order with ID = %s cannot be updated at this stage";
 
@@ -185,6 +186,26 @@ public class OrderServiceImpl implements OrderService {
         }
         log.info("Canceled {} orders by user {} request cancelAllOrders", canceledAmount, authedUserId);
         orderRepo.saveAll(orders);
+    }
+
+    @Override
+    public OrderDto changeStatus(long orderId, String newStatusStr) {
+        long authedUserId = getAuthedUserId();
+        OrderStatus newStatus;
+        try {
+            newStatus = OrderStatus.valueOf(newStatusStr);
+        } catch (IllegalArgumentException e) {
+            throw new WebException(String.format(ORDER_CANT_PARSE_STATUS_STR, orderId), HttpStatus.BAD_REQUEST);
+        }
+        Optional<Order> orderOpt = orderRepo.findById(orderId);
+        if (orderOpt.isEmpty()) {
+            throw new WebException(String.format(ORDER_NOT_FOUND, orderId), HttpStatus.NOT_FOUND);
+        }
+        Order order = orderOpt.get();
+        order.setStatus(newStatus);
+        order = orderRepo.save(order);
+        log.info("Updated order status to {} of orderId={} by admin userId={}", newStatus, orderId, authedUserId);
+        return mapToOrderDto(order);
     }
 
     @Override

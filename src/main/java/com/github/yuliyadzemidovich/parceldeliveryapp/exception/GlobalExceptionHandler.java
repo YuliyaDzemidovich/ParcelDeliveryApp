@@ -14,7 +14,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(WebException.class)
     public ResponseEntity<String> handleException(WebException e) {
-        log.error(MSG_EXCEPTION_CAUGHT, e);
+        // shorter exception logging since this is custom web-level exception
+        log.error(MSG_EXCEPTION_CAUGHT + e.getMessage());
         return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }
 
