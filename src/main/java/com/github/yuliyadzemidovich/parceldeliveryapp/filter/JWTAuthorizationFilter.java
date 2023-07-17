@@ -21,10 +21,12 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.API_VERSION;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.OPENAPI_BASE_URL;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PATH_ACTUATOR_HEALTH;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.LOGIN;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.PREFIX_BEARER;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.REGISTER;
+import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.SWAGGER_BASE_URL;
 import static com.github.yuliyadzemidovich.parceldeliveryapp.Constants.USER;
 
 /**
@@ -87,6 +89,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private boolean inAllowedList(String path) {
         return path.startsWith(PATH_ACTUATOR_HEALTH)
+                || path.startsWith(OPENAPI_BASE_URL)
+                || path.startsWith(SWAGGER_BASE_URL)
                 || path.startsWith(API_VERSION + LOGIN)
                 || path.startsWith(API_VERSION + USER + REGISTER);
     }
