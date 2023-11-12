@@ -1,6 +1,8 @@
 package com.github.yuliyadzemidovich.parceldeliveryapp.service;
 
+import com.github.yuliyadzemidovich.parceldeliveryapp.dto.CourierDto;
 import com.github.yuliyadzemidovich.parceldeliveryapp.dto.UserDto;
+import com.github.yuliyadzemidovich.parceldeliveryapp.entity.CourierInfo;
 import com.github.yuliyadzemidovich.parceldeliveryapp.entity.User;
 
 /**
@@ -27,6 +29,16 @@ public class DtoMapper {
                 .name(user.getName())
                 // no mapping for password hash
                 .role(user.getRole().getShortValue())
+                .build();
+    }
+
+    public static CourierDto mapToCourierDto(CourierInfo courierInfo) {
+        User courierUser = courierInfo.getUser();
+        return CourierDto.builder()
+                .id(courierUser.getId())
+                .email(courierUser.getEmail())
+                .name(courierUser.getName())
+                .isAvailable(courierInfo.isAvailable())
                 .build();
     }
 }

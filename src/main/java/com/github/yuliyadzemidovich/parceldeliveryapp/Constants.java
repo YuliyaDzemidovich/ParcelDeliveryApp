@@ -8,6 +8,7 @@ public class Constants {
     public static final String USER = "/user";
     public static final String ADMIN = "/admin";
     public static final String COURIER = "/courier";
+    public static final String COURIERS = "/couriers";
     public static final String ORDERS = "/orders";
     public static final String CANCEL = "/cancel";
     public static final String ADDRESS = "/address";

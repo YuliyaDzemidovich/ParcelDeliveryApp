@@ -6,6 +6,9 @@ import com.github.yuliyadzemidovich.parceldeliveryapp.exception.WebException;
 
 import java.util.List;
 
+/**
+ * Service to manage Orders.
+ */
 public interface OrderService {
 
     /**
